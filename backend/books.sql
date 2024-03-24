@@ -118,3 +118,5 @@ WHERE title = 'Atomic Habits';
 UPDATE Books
 SET description = 'Jen Sincero delivers a witty and irreverent guide to personal development, encouraging readers to embrace their inner badass and live life on their own terms. With humor and insight, Sincero offers practical advice and exercises to help readers overcome self-doubt, cultivate self-love, and unleash their full potential.'
 WHERE title = 'You Are a Badass';
+
+INSERT INTO Admin(admin_email,password_hash) VALUES('admin@gmail.com','admin@123')
