@@ -1,5 +1,5 @@
 const express = require('express');
-const { authMiddleware } = require('./middleware');
+const { authMiddleware ,adminMiddleware} = require('./middleware');
 const { query } = require('./db');
 
 const router = express.Router();
@@ -34,8 +34,8 @@ router.post('/checkout', authMiddleware, async (req, res) => {
 
       // Update the OwnedBooks table
       await query(`
-          INSERT INTO OwnedBooks (customer_id, book_id, purchase_id)
-          VALUES (?, ?, NULL)
+          INSERT INTO OwnedBooks (customer_id, book_id)
+          VALUES (?, ?)
       `, [customerId, bookId]);
 
       // Update the customer's balance
@@ -51,5 +51,37 @@ router.post('/checkout', authMiddleware, async (req, res) => {
   }
 });
 
+router.put('/books/:id', adminMiddleware, async (req, res) => {
+    const bookId = req.params.id;
+    const { price } = req.body;
+  
+    try {
+      // Update the price of the book in the database
+      await query(`
+        UPDATE Books SET price = ? WHERE book_id = ?
+      `, [price, bookId]);
+  
+      res.status(200).json({ message: 'Book price updated successfully' });
+    } catch (error) {
+      console.error('Error updating book price:', error);
+      res.status(500).json({ error: 'Internal Server Error' });
+    }
+  });
+
+router.delete('/books/:id', authMiddleware, async (req, res) => {
+const bookId = req.params.id;
+
+try {
+    // Delete the book from the database
+    await query(`
+    DELETE FROM Books WHERE book_id = ?
+    `, [bookId]);
+
+    res.status(200).json({ message: 'Book deleted successfully' });
+} catch (error) {
+    console.error('Error deleting book:', error);
+    res.status(500).json({ error: 'Internal Server Error' });
+}
+});
 
 module.exports = router;

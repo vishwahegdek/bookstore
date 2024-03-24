@@ -1,0 +1,6 @@
+.bg {
+    background-image: url(../public/bg.jpg);
+    width: 1980px;
+    height: 1080px;
+    background-size: cover;
+}

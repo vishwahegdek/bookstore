@@ -17,6 +17,11 @@ const signinBody = zod.object({
   password: zod.string(),
 });
 
+const adminSigninBody = zod.object({
+  email: zod.string().email(),
+  password: zod.string(),
+});
+
 router.post('/signup', async (req, res) => {
     const body = req.body;
     const { success, data } = signupBody.safeParse(body);
@@ -99,5 +104,44 @@ router.post('/signin', async (req, res) => {
     });
   }
 });
+
+router.post('/adminsignin', async (req, res) => {
+  const body = req.body;
+  const { success, data } = adminSigninBody.safeParse(body);
+
+  if (!success) {
+    return res.status(411).json({
+      msg: 'Invalid inputs',
+    });
+  }
+
+  const { email, password } = data;
+  try {
+    // Check if the admin exists
+    const existingUser = await query('SELECT * FROM Admin WHERE admin_email = ? AND password_hash = ?', [email, password]);
+    console.log(existingUser)
+    if (existingUser.length === 0) {
+      return res.status(411).json({
+        msg: 'Invalid credentials',
+      });
+    }
+
+    // Create a token for the existing user
+    const admintoken = jwt.sign({
+      email,
+    },key);
+    console.log(admintoken)
+    
+    res.status(200).json({
+      admintoken,
+    });
+  } catch (error) {
+    console.error('Error signing in:', error);
+    res.status(500).json({
+      error: 'Internal Server Error',
+    });
+  }
+});
+
 
 module.exports = router;

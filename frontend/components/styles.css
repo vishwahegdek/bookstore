@@ -1,0 +1,117 @@
+
+.genres {
+    display: flex;
+    overflow-x: auto;
+    margin-left: 40px;
+}
+
+.genre {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex:0 0 auto;
+    border: 1px solid black;
+    margin: 10px;
+    width: 200px;
+}
+
+.book img{
+    width: 150px;
+    height: 250px;
+}
+
+.book{
+    display: flex;
+    flex:1;
+    margin-left: 40px;
+    margin-bottom: 40px;
+    margin-top: 40px;
+}
+
+.description {
+    margin-left: 100px;
+}
+
+.editbook {
+    margin-left: 40px;
+    margin-bottom: 40px;
+    margin-top: 40px;
+}
+
+input {
+    width: 150px;
+    padding: 12px 20px;
+    margin: 8px 0;
+    display: inline-block;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    box-sizing: border-box;
+  }
+  
+  /* Style the button */
+  button {
+    background-color: #4CAF50;
+    color: white;
+    padding: 12px 20px;
+    margin: 20px;
+    border: none;
+    cursor: pointer;
+    width: 150px;
+    border-radius: 4px;
+  }
+  
+  /* Style the input box when it is focused */
+  input:focus {
+    border: 3px solid #555;
+  }
+  
+  /* Style the button when it is hovered over */
+  button:hover {
+    background-color: #45a049;
+  }
+
+.heading {
+    margin-left: 40px;
+    margin-top: 11px;
+    font-size: xx-large;
+    font-weight: bold;
+}
+
+body {
+    margin: 0;
+    padding: 0;
+    background-image: url("../public/bg.jpg");
+    background-size: cover;
+    background-repeat: no-repeat;
+    background-attachment: fixed;
+}
+
+.stats {
+    font-size:x-large;
+    font-weight: bold;
+    justify-content: space-between;
+    overflow-x: auto;
+    margin-left: 100px;
+    margin-right: 100px;
+    margin-top: 50px;
+}
+
+.manage {
+    margin: 100px;
+    font-size:x-large;
+    font-weight: bold;
+}
+
+.genre {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex:0 0 auto;
+    border: 1px solid black;
+    margin: 10px;
+    width: 200px;
+}
+
+.navbar {
+    margin: 40px;;
+}

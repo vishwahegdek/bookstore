@@ -1,24 +1,47 @@
 const express = require('express');
-const { authMiddleware } = require('./middleware'); // Assuming you have a middleware for authentication
-const { query } = require('./db'); // Assuming your database module is named 'db'
+const path = require('path');
+const { authMiddleware ,adminMiddleware} = require('./middleware');
+const { query } = require('./db');
 
 const router = express.Router();
 
 
-// All Books
-router.get('/books', async (req, res) => {
-    try {
-      const books = await query(`
-        SELECT * FROM Books
-      `);
-  
-      res.json({ books });
-      console.log(req.username)
-    } catch (error) {
-      console.error('Error fetching books:', error);
+router.get('/book/:book_id', async (req, res) => {
+  const bookId = req.params.book_id;
+  try {
+      const book = await query(`
+          SELECT * FROM Books
+          WHERE book_id = ?
+      `, [bookId]);
+      
+      if (book.length === 0) {
+          return res.status(404).json({ error: 'Book not found' });
+      }
+      const imageUrl = `/book_images/${book[0].book_id}.jpg`;
+      book[0].imageUrl = imageUrl;
+      res.json({ book });
+  } catch (error) {
+      console.error('Error fetching book:', error);
       res.status(500).json({ error: 'Internal Server Error' });
+  }
+});
+
+router.get('/books',adminMiddleware, async (req,res)=>{
+  try {
+    const book = await query(`
+        SELECT * FROM Books`);
+    
+    if (book.length === 0) {
+        return res.status(404).json({ error: 'Book not found' });
     }
-  });
+
+    res.json({ book });
+} catch (error) {
+    console.error('Error fetching book:', error);
+    res.status(500).json({ error: 'Internal Server Error' });
+}
+})
+
 
 // All Genres
 router.get('/genres', async (req, res) => {
@@ -43,6 +66,14 @@ try {
         SELECT * FROM Books
         WHERE genre_id = ?
       `, [genreId]);
+      
+
+      // Construct image URLs for each book
+      for (let book of books) {
+        // Assuming book ID is used for filename and .jpg extension
+        const imageUrl = `/book_images/${book.book_id}.jpg`;
+        book.imageUrl = imageUrl;
+      }
   
       res.json({ books });
     } catch (error) {
@@ -162,6 +193,80 @@ try {
       res.status(500).json({ error: 'Internal Server Error' });
     }
   });
+
+  
+  router.get('/system-stats',adminMiddleware, async (req, res) => {
+    try {
+      const [usersCount] = await query('SELECT COUNT(*) AS total_users FROM Customer');
+      const [booksCount] = await query('SELECT COUNT(*) AS total_books FROM Books');
+      const [genresCount] = await query('SELECT COUNT(*) AS total_genres FROM Genres');
+      const [systemStats] = await query('SELECT total_books_sold, total_books_in_stock FROM SystemStats');
+
+      const totalUsers = usersCount ? usersCount.total_users : 0;
+      const totalBooks = booksCount ? booksCount.total_books : 0;
+      const totalGenres = genresCount ? genresCount.total_genres : 0;
+      const totalBooksSold = systemStats ? systemStats.total_books_sold : 0;
+      const totalBooksInStock = systemStats ? systemStats.total_books_in_stock : 0;
+
+      res.json({
+        totalUsers,
+        totalBooks,
+        totalGenres,
+        totalBooksSold,
+        totalBooksInStock
+      });
+    } catch (error) {
+      console.error('Error fetching system stats:', error);
+      res.status(500).json({ error: 'Internal Server Error' });
+    }
+  });
+
+  // Fetch all user details
+router.get('/users', adminMiddleware, async (req, res) => {
+  try {
+    const users = await query(`
+      SELECT *
+      FROM Customer
+    `);
+
+    res.json({ users });
+  } catch (error) {
+    console.error('Error fetching users:', error);
+    res.status(500).json({ error: 'Internal Server Error' });
+  }
+});
+
+// Delete a user
+// Delete a user
+router.delete('/users/:userId', adminMiddleware, async (req, res) => {
+  const userId = req.params.userId;
+
+  try {
+    // Delete related records in OwnedBooks table
+    await query(`
+      DELETE FROM OwnedBooks
+      WHERE customer_id = ?
+    `, [userId]);
+
+    // Then delete the user
+    const result = await query(`
+      DELETE FROM Customer
+      WHERE customer_id = ?
+    `, [userId]);
+
+    if (result.affectedRows === 0) {
+      return res.status(404).json({ error: 'User not found' });
+    }
+
+    res.json({ msg: 'User deleted successfully' });
+  } catch (error) {
+    console.error('Error deleting user:', error);
+    res.status(500).json({ error: 'Internal Server Error' });
+  }
+});
+
+
+
   
   
   module.exports = router;
